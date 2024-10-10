@@ -6,14 +6,22 @@ use std::process;
 use tempfile::{Builder};
 use reqwest::blocking::get;
 use reqwest::Url;
-use anyhow::{anyhow, Result};
+use error_chain::{bail, error_chain};
+
+error_chain! {
+    foreign_links {
+        Io(std::io::Error);
+        HttpRequest(reqwest::Error);
+        UrlParse(url::ParseError);
+    }
+}
 
 fn download_file(url: &str) -> Result<PathBuf> {
     let parsed_url = Url::parse(url)?;
     let filename = parsed_url
         .path_segments()
         .and_then(|segments| segments.last())
-        .ok_or(anyhow!("Error: Failed to extract the filename from the URL."))?;
+        .ok_or("Error: Failed to extract the filename from the URL.")?;
 
     let temp_dir = Builder::new()
         .keep(true)
@@ -22,7 +30,7 @@ fn download_file(url: &str) -> Result<PathBuf> {
 
     let response = get(url)?;
     if !response.status().is_success() {
-        return Err(anyhow!("Error: Failed to download file. HTTP Status: {}", response.status()));
+        bail!("Error: Failed to download file. HTTP Status: {}", response.status());
     }
 
     let mut dest = File::create(&file_path)?;

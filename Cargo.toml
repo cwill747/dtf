@@ -6,7 +6,8 @@ edition = "2021"
 [dependencies]
 reqwest = { version = "0.12.8", features = ["blocking"] }
 tempfile = "3.3"
-anyhow = "1.0"
+error-chain = "0.12.4"
+url = "2.5.2"
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
