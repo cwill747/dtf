@@ -1,0 +1,15 @@
+[package]
+name = "dtf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reqwest = { version = "0.12.8", features = ["blocking"] }
+tempfile = "3.3"
+anyhow = "1.0"
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"  # Optimize for size.
+lto = true
+panic = "abort"
