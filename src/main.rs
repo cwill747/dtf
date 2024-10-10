@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::copy;
 use std::path::PathBuf;
 use std::process;
-use tempfile::tempdir;
+use tempfile::{Builder};
 use reqwest::blocking::get;
 use reqwest::Url;
 use anyhow::{anyhow, Result};
@@ -15,7 +15,9 @@ fn download_file(url: &str) -> Result<PathBuf> {
         .and_then(|segments| segments.last())
         .ok_or(anyhow!("Error: Failed to extract the filename from the URL."))?;
 
-    let temp_dir = tempdir()?;
+    let temp_dir = Builder::new()
+        .keep(true)
+        .tempdir()?;
     let file_path = temp_dir.path().join(filename);
 
     let response = get(url)?;
