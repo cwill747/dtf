@@ -1,12 +1,11 @@
-use std::env;
 use std::fs::File;
 use std::io::copy;
 use std::path::PathBuf;
 use std::process;
 use tempfile::{Builder};
 use reqwest::blocking::get;
-use reqwest::Url;
 use error_chain::{bail, error_chain};
+use clap::Parser;
 
 error_chain! {
     foreign_links {
@@ -16,9 +15,8 @@ error_chain! {
     }
 }
 
-fn download_file(url: &str) -> Result<PathBuf> {
-    let parsed_url = Url::parse(url)?;
-    let filename = parsed_url
+fn download_file(url: reqwest::Url) -> Result<PathBuf> {
+    let filename = url
         .path_segments()
         .and_then(|segments| segments.last())
         .ok_or("Error: Failed to extract the filename from the URL.")?;
@@ -40,16 +38,17 @@ fn download_file(url: &str) -> Result<PathBuf> {
     Ok(file_path)
 }
 
+#[derive(Parser)]
+struct Cli {
+    /// the URL to download
+    path: reqwest::Url,
+}
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        eprintln!("Usage: download_file <URL>");
-        process::exit(1);
-    }
+    let args = Cli::parse();
 
-    let url = &args[1];
 
-    match download_file(url) {
+    match download_file(args.path) {
         Ok(file_path) => {
             println!("{}", file_path.display());
         }
